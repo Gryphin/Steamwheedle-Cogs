@@ -1,5 +1,9 @@
 from typing import Literal
-
+import sys
+import csv
+import urllib.request
+from io import StringIO
+from contextlib import redirect_stdout
 import discord
 from redbot.core import commands
 from redbot.core.bot import Red
@@ -22,22 +26,25 @@ class GuildRecruit(commands.Cog):
         )
 
     async def red_delete_data_for_user(
-            self, *, requester: RequestType, user_id: int
+        self, *, requester: RequestType, user_id: int
     ) -> None:
         # TODO: Replace this with the proper end user data removal handling.
         super().red_delete_data_for_user(requester=requester, user_id=user_id)
 
     @commands.command()
-    async def recruit(ctx):
-        embed: discord.Embed = discord.Embed(
-            title="title", description="description",
-            color=discord.Color.red()
-        )
-file = open("guild.txt", "r")
-for line in file.readlines():
-    l = line.strip()
-    loglist.append(l)
-    embed.add_field(name="⠀", value=" `{0}`".format(l), inline=False)
-embed.set_author(name="name")
+    async def recruit(self, ctx):
+        #replace url with link to your google spreadsheet.
+        url = ''
+        response = urllib.request.urlopen(url)
+        lines = [l.decode('utf-8') for l in response.readlines()]
+        cr = csv.reader(lines)
 
-await ctx.send(embed=embed)
+        original_stdout = sys.stdout
+        with open('guild.txt', 'w') as f:
+            with redirect_stdout(f):
+                for row in cr:
+                    print(','.join(row))
+                sys.stdout = original_stdout
+        with open('guild.txt', 'r') as g:
+            content = g.read()
+            await ctx.send(content)
