@@ -12,7 +12,7 @@ from redbot.core.config import Config
 RequestType = Literal["discord_deleted_user", "owner", "user", "user_strict"]
 
 
-class GuildRecruit(commands.Cog):
+class recruit(commands.Cog):
     """
     Simple Cog to post image of recruitment info.
     """
