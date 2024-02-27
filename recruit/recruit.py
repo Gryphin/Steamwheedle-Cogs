@@ -1,4 +1,5 @@
 from typing import Literal
+import gspread
 import sys
 import csv
 import urllib.request
@@ -33,18 +34,16 @@ class recruit(commands.Cog):
 
     @commands.command()
     async def recruit(self, ctx):
-        #replace url with link to your google spreadsheet.
-        url = ''
-        response = urllib.request.urlopen(url)
-        lines = [l.decode('utf-8') for l in response.readlines()]
-        cr = csv.reader(lines)
-
+        gc = gspread.service_account()
+        sh = gc.open("Steamwheedle Recruitment")
+        worksheet = sh.worksheet("Recruitment")
+        guilds_list = [item for item in worksheet.col_values(1) if item]
         original_stdout = sys.stdout
         with open('guild.txt', 'w') as f:
             with redirect_stdout(f):
-                for row in cr:
-                    print(','.join(row))
+                for item in guilds_list:
+                    print(item)
                 sys.stdout = original_stdout
         with open('guild.txt', 'r') as g:
-            content = g.read()
-            await ctx.send(content)
+                content = g.read()
+                await ctx.send(content)
