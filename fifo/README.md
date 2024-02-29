@@ -7,7 +7,7 @@ All settings are available under `[p]fifo`.
 ## Guild Commands
 | Command        | Description                                                  |
 | :------------- | :----------------------------------------------------------- |
-| `background`   | Sets or removes the background image for the welcome message |
+| `add`          | Add a new task to this guild's task list                     |  
 | `test`         | Send a test message in the current channel                   |
 | `toggle`       | Enable or disable this cog in the current guild              |
 | `reset`        | Reset all settings to the default values                     |
