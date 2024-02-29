@@ -8,25 +8,21 @@ All settings are available under `[p]fifo`.
 | Command        | Description                                                  |
 | :------------- | :----------------------------------------------------------- |
 | `add`          | Add a new task to this guild's task list                     |  
-| `test`         | Send a test message in the current channel                   |
-| `toggle`       | Enable or disable this cog in the current guild              |
-| `reset`        | Reset all settings to the default values                     |
 
-### avatar
-`[p]fifo avatar`
+### Add Triggers
+`[p]fifo addtrigger`
 | Command        | Description                                                  |
 | :------------- | :----------------------------------------------------------- |
-| `border`       | Set the profile picture border width                         |
-| `border_color` | Set the profile picture border color using RGB values        |
-| `position`     | Set the position of the profile picture                      |
-| `radius`       | Set the radius of the profile picture                        |
+| `cron`         | Add a cron "time of day" trigger to the specified task       |
+| `date`         | Add a "run once" datetime trigger to the specified task      |
+| `interval`     | Add an interval trigger to the specified task                |
+| `relative`     | trigger at a time relative from now to the specified task    |
 
-### channel
-`[p]fifo channel`
+### Check Tasks
+`[p]fifo checktask`
 | Command | Description                                    |
 | :------ | :--------------------------------------------- |
-| `join`  | Set the channel to send the welcome message in |
-| `leave` | Set the channel to send the leave message in   |
+| `checktask`  | Returns the next 10 scheduled executions of the task|
 
 ### count
 `[p]fifo count`
