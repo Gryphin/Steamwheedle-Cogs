@@ -1,8 +1,8 @@
-# fifo
+# recruit
 Base command for handling scheduling of tasks
 
 ## Usage
-All settings are available under `[p]fifo`.
+All settings are available under `[p]recruit`.
 
 ## Guild Commands
 | Command        | Description                                                  |
@@ -10,7 +10,7 @@ All settings are available under `[p]fifo`.
 | `add`          | Add a new task to this guild's task list                     |  
 
 ### Add Triggers
-`[p]fifo addtrigger`
+`[p]recruit addtrigger`
 | Command        | Description                                                  |
 | :------------- | :----------------------------------------------------------- |
 | `cron`         | Add a cron "time of day" trigger to the specified task       |
@@ -19,13 +19,13 @@ All settings are available under `[p]fifo`.
 | `relative`     | trigger at a time relative from now to the specified task    |
 
 ### Check Tasks
-`[p]fifo checktask`
+`[p]recruit checktask`
 | Command | Description                                    |
 | :------ | :--------------------------------------------- |
 | `checktask`  | Returns the next 10 scheduled executions of the task|
 
 ### count
-`[p]fifo count`
+`[p]recruit count`
 | Command    | Description                                   |
 | :--------- | :-------------------------------------------- |
 | `color`    | Set the color of the counter using RGB values |
@@ -33,7 +33,7 @@ All settings are available under `[p]fifo`.
 | `size`     | Set the font size of the counter              |
 
 ### member
-`[p]fifo member`
+`[p]recruit member`
 | Command         | Description                                      |
 | :-------------- | :----------------------------------------------- |
 | `join_image`    | Enable or disable image when a member joins      |
@@ -44,7 +44,7 @@ All settings are available under `[p]fifo`.
 | `leave_toggle`  | Enable or disable the leave message altogether   |
 
 ### text
-`[p]fifo text`
+`[p]recruit text`
 | Command    | Description                                   |
 | :--------- | :-------------------------------------------- |
 | `color`    | Set the color of the text using RGB values    |
