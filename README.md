@@ -45,8 +45,8 @@ Check out *Deprecated* my V2 cogs at [Fox-Cogs v2](https://github.com/bobloy/Fox
 # Installation
 ### Recommended - Built-in Downloader
 ```
-[p]repo add Fox https://github.com/bobloy/Fox-V3
-[p]cog install Fox <cogname>
+[p]repo add Steamwheedle-Cogs https://github.com/Gryphin/Steamwheedle-Cogs
+[p]cog install Steamwheedle-Cogs <cogname>
 [p]load <cogname>
 ```
 
