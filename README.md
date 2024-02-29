@@ -48,13 +48,6 @@ Cog Function
 [p]load <cogname>
 ```
 
-# Contact
-Get support on the [Third Party Cog Server](https://discord.gg/GET4DVk)
-
-Feel free to @ me in the #support_fox-v3 channel
-
-Discord: Bobloy#6513
-
 # Credits
 
 Huge thanks to all the helpful people in #coding on the [discord support server](https://discord.gg/red)
