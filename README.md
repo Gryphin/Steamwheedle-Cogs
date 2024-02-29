@@ -5,7 +5,7 @@ Cog Function
 | Name | Status | Description (Click to see full status)
 | --- | --- | --- |
 | fifo | **Alpha** | <details><summary>Schedule commands to be run at certain times or intervals</summary>Just released, please report bugs as you find them. Only works for bot owner for now</details> |
-| recruit | **Alpha** | <details><summary>Create temporary marks on users that expire after specified time</summary>Ported, will not import old data. Please report bugs</details> |
+| recruit | **Alpha** | <details><summary>Pulls data from spreadsheet, then displays output in channel</summary>Ported, will not import old data. Please report bugs</details> |
 | welcome | **Alpha** | <details><summary>Mentions unmentionable roles</summary>Very simple cog, mention doesn't persist</details> |
 
 
