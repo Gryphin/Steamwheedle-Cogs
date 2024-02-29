@@ -1,8 +1,8 @@
-# welcome
-Welcomes a user to the server with an image.
+# fifo
+Base command for handling scheduling of tasks
 
 ## Usage
-All settings are available under `[p]welcomeset`.
+All settings are available under `[p]fifo`.
 
 ## Guild Commands
 | Command        | Description                                                  |
@@ -13,7 +13,7 @@ All settings are available under `[p]welcomeset`.
 | `reset`        | Reset all settings to the default values                     |
 
 ### avatar
-`[p]welcomeset avatar`
+`[p]fifo avatar`
 | Command        | Description                                                  |
 | :------------- | :----------------------------------------------------------- |
 | `border`       | Set the profile picture border width                         |
@@ -22,14 +22,14 @@ All settings are available under `[p]welcomeset`.
 | `radius`       | Set the radius of the profile picture                        |
 
 ### channel
-`[p]welcomeset channel`
+`[p]fifo channel`
 | Command | Description                                    |
 | :------ | :--------------------------------------------- |
 | `join`  | Set the channel to send the welcome message in |
 | `leave` | Set the channel to send the leave message in   |
 
 ### count
-`[p]welcomeset count`
+`[p]fifo count`
 | Command    | Description                                   |
 | :--------- | :-------------------------------------------- |
 | `color`    | Set the color of the counter using RGB values |
@@ -37,7 +37,7 @@ All settings are available under `[p]welcomeset`.
 | `size`     | Set the font size of the counter              |
 
 ### member
-`[p]welcomeset member`
+`[p]fifo member`
 | Command         | Description                                      |
 | :-------------- | :----------------------------------------------- |
 | `join_image`    | Enable or disable image when a member joins      |
@@ -48,7 +48,7 @@ All settings are available under `[p]welcomeset`.
 | `leave_toggle`  | Enable or disable the leave message altogether   |
 
 ### text
-`[p]welcomeset text`
+`[p]fifo text`
 | Command    | Description                                   |
 | :--------- | :-------------------------------------------- |
 | `color`    | Set the color of the text using RGB values    |
