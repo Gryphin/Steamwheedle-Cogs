@@ -31,7 +31,7 @@ class recruit(commands.Cog):
     ) -> None:
         # TODO: Replace this with the proper end user data removal handling.
         super().red_delete_data_for_user(requester=requester, user_id=user_id)
-
+###If PermissionError: [Errno 13] Permission denied: 'guild.txt' use absolute path to guild.txt
     @commands.command()
     async def recruit(self, ctx):
         gc = gspread.service_account()
