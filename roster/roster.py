@@ -13,7 +13,7 @@ from redbot.core.config import Config
 RequestType = Literal["discord_deleted_user", "owner", "user", "user_strict"]
 
 
-class recruit(commands.Cog):
+class roster(commands.Cog):
     """
     Simple Cog to post image of recruitment info.
     """
@@ -33,7 +33,7 @@ class recruit(commands.Cog):
         super().red_delete_data_for_user(requester=requester, user_id=user_id)
 ###If PermissionError: [Errno 13] Permission denied: 'guild.txt' use absolute path to guild.txt
     @commands.command()
-    async def recruit(self, ctx):
+    async def roster(self, ctx):
         gc = gspread.service_account()
         sh = gc.open("Steamwheedle Recruitment")
         worksheet = sh.worksheet("Roster")
