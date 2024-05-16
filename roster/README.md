@@ -1,16 +1,16 @@
-# recruit
+# roster
 Base command for handling scheduling of tasks
 
 ## Usage
-All settings are available under `[p]recruit`.
+All settings are available under `[p]roster`.
 
 ## Guild Commands
 | Command        | Description                                                  |
 | :------------- | :----------------------------------------------------------- |
-| `[p]recruit`   | Displays the list of current guilds needing members.         |  
+| `[p]roster`   | Displays the list of current guilds.                          |  
 
 ### Future Features
-`[p]recruit ...`
+`[p]roster ...`
 | Command        | Description                                                  |
 | :------------- | :----------------------------------------------------------- |
 | `url`          | Changes the url of the spreadsheet, if compromised           |
