@@ -36,14 +36,14 @@ class recruit(commands.Cog):
     async def recruit(self, ctx):
         gc = gspread.service_account()
         sh = gc.open("Steamwheedle Recruitment")
-        worksheet = sh.worksheet("Recruitment")
-        guilds_list = [item for item in worksheet.col_values(1) if item]
+        worksheet = sh.worksheet("Roster")
+        roster_list = [item for item in worksheet.col_values(1) if item]
         original_stdout = sys.stdout
-        with open('guild.txt', 'w') as f:
+        with open('roster.txt', 'w') as f:
             with redirect_stdout(f):
-                for item in guilds_list:
+                for item in roster_list:
                     print(item)
                 sys.stdout = original_stdout
-        with open('guild.txt', 'r') as g:
+        with open('roster.txt', 'r') as g:
                 content = g.read()
                 await ctx.send(content)
