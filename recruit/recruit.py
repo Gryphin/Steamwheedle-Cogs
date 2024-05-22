@@ -1,12 +1,12 @@
 from typing import Literal
 import gspread
+import os
 import sys
-import csv
 import urllib.request
 from io import StringIO
 from contextlib import redirect_stdout
 import discord
-from redbot.core import commands
+from redbot.core import commands, app_commands
 from redbot.core.bot import Red
 from redbot.core.config import Config
 
@@ -32,18 +32,19 @@ class recruit(commands.Cog):
         # TODO: Replace this with the proper end user data removal handling.
         super().red_delete_data_for_user(requester=requester, user_id=user_id)
 ###If PermissionError: [Errno 13] Permission denied: 'guild.txt' use absolute path to guild.txt
-    @commands.command()
-    async def recruit(self, ctx):
+    @app_commands.command()
+    async def recruit(self, interaction: discord.Interaction):
+        mypath = os.path.dirname(os.path.abspath(__file__))
         gc = gspread.service_account()
         sh = gc.open("Steamwheedle Recruitment")
         worksheet = sh.worksheet("Recruitment")
         guilds_list = [item for item in worksheet.col_values(1) if item]
         original_stdout = sys.stdout
-        with open('guild.txt', 'w') as f:
+        with open(mypath+'/guild.txt', 'w') as f:
             with redirect_stdout(f):
                 for item in guilds_list:
                     print(item)
                 sys.stdout = original_stdout
-        with open('guild.txt', 'r') as g:
+        with open(mypath+'/guild.txt', 'r') as g:
                 content = g.read()
-                await ctx.send(content)
+                await interaction.response.send_message(content)
