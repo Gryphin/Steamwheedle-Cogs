@@ -47,5 +47,5 @@ class recruit(commands.Cog):
                 sys.stdout = original_stdout
         with open(mypath+'/guild.txt', 'r') as g:
                 content = g.read()
-                embed = discord.Embed(title='Recruiting Guilds', description="content", color=discord.Color.red())
+                embed = discord.Embed(title='Recruiting Guilds', description=f"{content}", color=discord.Color.red())
                 await interaction.response.send_message(embed=embed)
