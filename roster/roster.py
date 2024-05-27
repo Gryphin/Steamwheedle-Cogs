@@ -33,7 +33,7 @@ class roster(commands.Cog):
         super().red_delete_data_for_user(requester=requester, user_id=user_id)
 ###If PermissionError: [Errno 13] Permission denied: 'guild.txt' use absolute path to guild.txt
     @app_commands.command()
-    async def recruit(self, interaction: discord.Interaction):
+    async def roster(self, interaction: discord.Interaction):
         mypath = os.path.dirname(os.path.abspath(__file__))
         gc = gspread.service_account()
         sh = gc.open("Steamwheedle Recruitment")
