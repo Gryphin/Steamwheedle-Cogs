@@ -34,6 +34,7 @@ class roster(commands.Cog):
 ###If PermissionError: [Errno 13] Permission denied: 'guild.txt' use absolute path to guild.txt
         @app_commands.command()
     async def roster(self, interaction: discord.Interaction):
+        mypath = os.path.dirname(os.path.abspath(__file__))
         gc = gspread.service_account()
         sh = gc.open("Steamwheedle Recruitment")
         worksheet = sh.worksheet("Roster")
