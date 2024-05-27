@@ -1,7 +1,7 @@
 from typing import Literal
 import gspread
+import os
 import sys
-import csv
 import urllib.request
 from io import StringIO
 from contextlib import redirect_stdout
@@ -37,15 +37,15 @@ class roster(commands.Cog):
         mypath = os.path.dirname(os.path.abspath(__file__))
         gc = gspread.service_account()
         sh = gc.open("Steamwheedle Recruitment")
-        worksheet = sh.worksheet("Roster")
-        roster_list = [item for item in worksheet.col_values(1) if item]
+        worksheet = sh.worksheet("Recruitment")
+        guilds_list = [item for item in worksheet.col_values(1) if item]
         original_stdout = sys.stdout
         with open('mypath+'/roster.txt', 'w') as f:
             with redirect_stdout(f):
-                for item in roster_list:
+                for item in guilds_list:
                     print(item)
                 sys.stdout = original_stdout
         with open('mypath+'/roster.txt', 'r') as g:
                 content = g.read()
-                embed = discord.Embed(title='Guild Listings', description=f"{content}", color=discord.Color.green())
+                embed = discord.Embed(title='Recruiting Guilds', description=f"{content}", color=discord.Color.red())
                 await interaction.response.send_message(embed=embed)
