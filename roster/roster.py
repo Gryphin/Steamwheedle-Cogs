@@ -32,8 +32,8 @@ class roster(commands.Cog):
         # TODO: Replace this with the proper end user data removal handling.
         super().red_delete_data_for_user(requester=requester, user_id=user_id)
 ###If PermissionError: [Errno 13] Permission denied: 'guild.txt' use absolute path to guild.txt
-    @commands.command()
-    async def roster(self, ctx):
+        @app_commands.command()
+    async def roster(self, interaction: discord.Interaction):
         gc = gspread.service_account()
         sh = gc.open("Steamwheedle Recruitment")
         worksheet = sh.worksheet("Roster")
