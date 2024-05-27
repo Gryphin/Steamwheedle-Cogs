@@ -40,12 +40,12 @@ class roster(commands.Cog):
         worksheet = sh.worksheet("Roster")
         roster_list = [item for item in worksheet.col_values(1) if item]
         original_stdout = sys.stdout
-        with open('mypath+'/roster.txt'', 'w') as f:
+        with open('mypath+'/roster.txt', 'w') as f:
             with redirect_stdout(f):
                 for item in roster_list:
                     print(item)
                 sys.stdout = original_stdout
-        with open('mypath+'/roster.txt'', 'r') as g:
+        with open('mypath+'/roster.txt', 'r') as g:
                 content = g.read()
                 embed = discord.Embed(title='Guild Listings', description=f"{content}", color=discord.Color.green())
                 await interaction.response.send_message(embed=embed)
