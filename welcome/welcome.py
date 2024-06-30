@@ -380,7 +380,7 @@ class Welcome(commands.Cog):
         async with self.config.guild(member.guild).all() as settings:
             file = None
             if settings["join_image"]:
-                msg = f"{member.name} Welcome to the Steamwheedle Cartel"
+                msg = f"{member.name} Welcome to Steamwheedle Cartel"
                 background = await self.create_image(settings, member, msg)
 
                 with BytesIO() as image_binary:
