@@ -8,7 +8,7 @@ import discord
 from redbot.core import commands, app_commands
 from redbot.core.bot import Red
 from redbot.core.config import Config
-import revilgaz.dl as dl
+import dl as dl
 RequestType = Literal["discord_deleted_user", "owner", "user", "user_strict"]
 dl.dl()
 
