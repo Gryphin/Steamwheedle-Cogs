@@ -1,17 +1,16 @@
 from typing import Literal
-import gspread
 import os
 import sys
-import urllib.request
+#import urllib.request
 from io import StringIO
 from contextlib import redirect_stdout
 import discord
 from redbot.core import commands, app_commands
 from redbot.core.bot import Red
 from redbot.core.config import Config
-
+import revilgaz.dl as dl
 RequestType = Literal["discord_deleted_user", "owner", "user", "user_strict"]
-
+dl.dl()
 
 class recruit(commands.Cog):
     """
@@ -31,21 +30,10 @@ class recruit(commands.Cog):
     ) -> None:
         # TODO: Replace this with the proper end user data removal handling.
         super().red_delete_data_for_user(requester=requester, user_id=user_id)
-###If PermissionError: [Errno 13] Permission denied: 'guild.txt' use absolute path to guild.txt
     @app_commands.command()
     async def recruit(self, interaction: discord.Interaction):
         mypath = os.path.dirname(os.path.abspath(__file__))
-        gc = gspread.service_account()
-        sh = gc.open("Steamwheedle Recruitment")
-        worksheet = sh.worksheet("Recruitment")
-        guilds_list = [item for item in worksheet.col_values(1) if item]
-        original_stdout = sys.stdout
-        with open('mypath+'/guild.txt', 'w') as f:
-            with redirect_stdout(f):
-                for item in guilds_list:
-                    print(item)
-                sys.stdout = original_stdout
-        with open('mypath+'/guild.txt', 'r') as g:
+        with open(mypath+'/guild.txt', 'r') as g:
                 content = g.read()
                 embed = discord.Embed(title='Recruiting Guilds', description=f"{content}", color=discord.Color.red())
                 await interaction.response.send_message(embed=embed)
