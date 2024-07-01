@@ -10,7 +10,7 @@ from redbot.core.bot import Red
 from redbot.core.config import Config
 from .dl import dl
 RequestType = Literal["discord_deleted_user", "owner", "user", "user_strict"]
-dl.dl()
+dl()
 
 class recruit(commands.Cog):
     """
