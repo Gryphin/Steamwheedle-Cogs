@@ -2,13 +2,13 @@ from typing import Literal
 import os
 import sys
 #import urllib.request
-from io import StringIO
+#from io import StringIO
 from contextlib import redirect_stdout
 import discord
 from redbot.core import commands, app_commands
 from redbot.core.bot import Red
 from redbot.core.config import Config
-import dl as dl
+from .dl import dl
 RequestType = Literal["discord_deleted_user", "owner", "user", "user_strict"]
 dl.dl()
 

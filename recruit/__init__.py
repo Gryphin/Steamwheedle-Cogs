@@ -4,7 +4,7 @@ from pathlib import Path
 from redbot.core.bot import Red
 
 from .recruit import recruit
-from .dl import dl
+
 with open(Path(__file__).parent / "info.json") as fp:
     __red_end_user_data_statement__ = json.load(fp)["end_user_data_statement"]
 
