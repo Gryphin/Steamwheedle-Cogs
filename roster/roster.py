@@ -47,5 +47,5 @@ class roster(commands.Cog):
                 sys.stdout = original_stdout
         with open(mypath+'/roster.txt', 'r') as g:
                 content = g.read()
-                embed = discord.Embed(title='Guilds Listing', description=f"{content}", color=discord.Color.green,())
+                embed = discord.Embed(title='Recruiting Guilds', description=f"{content}", color=discord.Color.green())
                 await interaction.response.send_message(embed=embed)
