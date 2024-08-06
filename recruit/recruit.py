@@ -2,6 +2,7 @@ from typing import Literal
 import gspread
 import os
 import sys
+import datetime
 import urllib.request
 from io import StringIO
 from contextlib import redirect_stdout
@@ -48,4 +49,6 @@ class recruit(commands.Cog):
         with open(mypath+'/guild.txt', 'r') as g:
                 content = g.read()
                 embed = discord.Embed(title='Recruiting Guilds', description=f"{content}", color=discord.Color.red())
+                embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1241482905822298246/1252150852882268170/steamwheedle-cartel.png")
+                embed.set_footer(text=datetime.datetime.now())
                 await interaction.response.send_message(embed=embed)
