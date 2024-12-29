@@ -49,8 +49,8 @@ class roster(commands.Cog):
         with open(mypath+'/roster.txt', 'r') as g:
                 content = g.read()
                 embed = discord.Embed(title='Guild Listings', description=f"{content}", color=discord.Color.green())
-                embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1241482905822298246/1252150852882268170/steamwheedle-cartel.png")
-                embed.set_footer(text=datetime.datetime.now())
+                #embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1241482905822298246/1252150852882268170/steamwheedle-cartel.png")
+                embed.set_footer(text=datetime.datetime.now(),icon_url="https://cdn.discordapp.com/attachments/1241482905822298246/1252150852882268170/steamwheedle-cartel.png")
                 await interaction.response.send_message(embed=embed)
 
 
