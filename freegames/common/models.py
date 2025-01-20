@@ -222,7 +222,7 @@ class FreeStuffResponse(Base):
 class StoreLogos(enum.Enum):
     steam = "https://store.steampowered.com/favicon.ico"
     epic_games_store = epic = (
-        "https://cdn.brandfetch.io/epicgames.com/w/441/h/512/logo"
+        "https://cdn.brandfetch.io/epicgames.com/w/441/h/512/logo?c=1idx8v1NtSm0-O05lPX"
     )
     ubisoft = uplay = (
         "https://cdn.brandfetch.io/ubisoft.com/w/493/h/512/theme/light/symbol"
