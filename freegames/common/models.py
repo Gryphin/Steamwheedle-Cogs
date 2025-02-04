@@ -225,29 +225,29 @@ class StoreLogos(enum.Enum):
         "https://cdn.brandfetch.io/epicgames.com/w/441/h/512/logo?c=1idx8v1NtSm0-O05lPX"
     )
     ubisoft = uplay = (
-        "https://cdn.brandfetch.io/ubisoft.com/w/493/h/512/theme/light/symbol"
+        "https://cdn.brandfetch.io/ubisoft.com/w/493/h/512/theme/light/symbol?c=1idx8v1NtSm0-O05lPX"
     )
-    gog = "https://cdn.brandfetch.io/gogalaxy.com/w/400/h/400"
-    itchio = itch = "https://cdn.brandfetch.io/itch.io/w/316/h/316"
+    gog = "https://cdn.brandfetch.io/gogalaxy.com/w/400/h/400?c=1idx8v1NtSm0-O05lPX"
+    itchio = itch = "https://cdn.brandfetch.io/itch.io/w/316/h/316?c=1idx8v1NtSm0-O05lPX"
     ps4 = ps5 = ps = (
-        "https://cdn.brandfetch.io/sonyentertainmentnetwork.com/w/400/h/400"
+        "https://cdn.brandfetch.io/sonyentertainmentnetwork.com/w/400/h/400?c=1idx8v1NtSm0-O05lPX"
     )
-    switch = "https://cdn.brandfetch.io/nintendo.com/w/400/h/400"
+    switch = "https://cdn.brandfetch.io/nintendo.com/w/400/h/400?c=1idx8v1NtSm0-O05lPX"
     android = google = (
-        "https://cdn.brandfetch.io/android.com/w/512/h/289/symbol"
+        "https://cdn.brandfetch.io/android.com/w/512/h/289/symbol?c=1idx8v1NtSm0-O05lPX"
     )
-    ios = apple = "https://cdn.brandfetch.io/apple.com/w/419/h/512/logo"
+    ios = apple = "https://cdn.brandfetch.io/apple.com/w/419/h/512/logo?c=1idx8v1NtSm0-O05lPX"
     vr = "https://designbundles.net/xfankystore/1181849-vr-glasses-icon-logo-virtual-reality-concept-glass"
     battlenet = "https://www.pngegg.com/en/search?q=Battle.net"
     origin = "https://worldvectorlogo.com/logo/origin-4"
     drm_free = "https://en.m.wikipedia.org/wiki/File:DRM-free.svg"
     xbox_360 = xbox = xbox_one = xbox_series_xs = (
-        "https://cdn.brandfetch.io/xbox.com/w/512/h/512/symbol"
+        "https://cdn.brandfetch.io/xbox.com/w/512/h/512/symbol?c=1idx8v1NtSm0-O05lPX"
     )
 
-    humble = "https://cdn.brandfetch.io/humblebundle.com/w/256/h/256"
-    twitch = "https://cdn.brandfetch.io/twitch.tv/w/439/h/512/symbol"
-    discord = "https://cdn.brandfetch.io/discord.com/w/512/h/397/symbol"
+    humble = "https://cdn.brandfetch.io/humblebundle.com/w/256/h/256?c=1idx8v1NtSm0-O05lPX"
+    twitch = "https://cdn.brandfetch.io/twitch.tv/w/439/h/512/symbol?c=1idx8v1NtSm0-O05lPX"
+    discord = "https://cdn.brandfetch.io/discord.com/w/512/h/397/symbol?c=1idx8v1NtSm0-O05lPX"
     other = ""
 
     def __str__(self):
