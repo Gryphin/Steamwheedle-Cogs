@@ -1,16 +1,16 @@
-# recruit
-Base command for handling scheduling of tasks
+# deck
+Base command for decoding & displaying Warcraft Rumble deck codes
 
 ## Usage
-All settings are available under `[p]recruit`.
+All settings are available under `[p]deck`.
 
 ## Guild Commands
 | Command        | Description                                                  |
 | :------------- | :----------------------------------------------------------- |
-| `[p]recruit`   | Displays the list of current guilds needing members.         |  
+| `[p]deck`   | Displays the decoded deck.         |  
 
 ### Future Features
-`[p]recruit ...`
+`[p]deck ...`
 | Command        | Description                                                  |
 | :------------- | :----------------------------------------------------------- |
 | `url`          | Changes the url of the spreadsheet, if compromised           |
