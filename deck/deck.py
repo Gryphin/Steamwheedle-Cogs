@@ -14,42 +14,66 @@ from redbot.core.config import Config
 RequestType = Literal["discord_deleted_user", "owner", "user", "user_strict"]
 
 
-class deck(commands.Cog):
-    """
-    Simple Cog to post image of recruitment info.
-    """
-
-    def __init__(self, bot: Red) -> None:
+class DeckDecoder(commands.Cog):
+    def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(
-            self,
-            identifier=709671911252164640,
-            force_registration=True,
-        )
 
-    async def red_delete_data_for_user(
-        self, *, requester: RequestType, user_id: int
-    ) -> None:
-        # TODO: Replace this with the proper end user data removal handling.
-        super().red_delete_data_for_user(requester=requester, user_id=user_id)
-###If PermissionError: [Errno 13] Permission denied: 'guild.txt' use absolute path to guild.txt
-    @app_commands.describe(rumblo="Pasted rumblo code")
-    @app_commands.command()
-    async def deck(self, interaction: discord.Interaction):
-        mypath = os.path.dirname(os.path.abspath(__file__))
-        gc = gspread.service_account()
-        sh = gc.open("Steamwheedle Recruitment")
-        worksheet = sh.worksheet("Recruitment")
-        guilds_list = [item for item in worksheet.col_values(1) if item]
-        original_stdout = sys.stdout
-        with open(mypath+'/guild.txt', 'w') as f:
-            with redirect_stdout(f):
-                for item in guilds_list:
-                    print(item)
-                sys.stdout = original_stdout
-        with open(mypath+'/guild.txt', 'r') as g:
-                content = g.read()
-                embed = discord.Embed(title='Recruiting Guilds', description=f"{content}", color=discord.Color.red())
-                #embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1241482905822298246/1252150852882268170/steamwheedle-cartel.png")
-                embed.set_footer(text=datetime.datetime.now(),icon_url="https://cdn.discordapp.com/attachments/1241482905822298246/1252150852882268170/steamwheedle-cartel.png")
-                await interaction.response.send_message(embed=embed)                
+    @commands.command(name='decode', description='Decodes a deck code using deckdecode.py')
+    async def decode_deck(self, ctx, *, deck_code: str):
+        """Decodes a deck code and displays the result in an embed."""
+        try:
+            # Run deckdecode.py with the provided deck code
+            process = subprocess.Popen(['python', 'deckdecode.py', deck_code], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            stdout, stderr = process.communicate()
+
+            if stderr:
+                embed = discord.Embed(
+                    title="Deck Decoding Error",
+                    description=f"An error occurred during decoding:\n```\n{stderr}\n```",
+                    color=discord.Color.red()
+                )
+                await ctx.send(embed=embed)
+                return
+
+            try:
+                 decoded_data = json.loads(stdout)
+
+                 embed = discord.Embed(
+                     title="Decoded Deck",
+                     color=discord.Color.blue()
+                 )
+
+                 embed.add_field(name="Format", value=decoded_data.get("format", "Unknown"), inline=False)
+                 embed.add_field(name="Hero", value=decoded_data.get("hero", "Unknown"), inline=False)
+
+                 cards_string = ""
+                 for card in decoded_data.get("cards", []):
+                     cards_string += f"{card['count']}x {card['name']}\n"
+                 if cards_string:
+                     embed.add_field(name="Cards", value=cards_string, inline=False)
+                 else:
+                     embed.add_field(name="Cards", value="No Cards Found", inline=False)
+                 await ctx.send(embed=embed)
+
+            except json.JSONDecodeError:
+                embed = discord.Embed(
+                    title="Deck Decoding Error",
+                    description=f"Invalid JSON returned from deckdecode.py:\n```\n{stdout}\n```",
+                    color=discord.Color.red()
+                )
+                await ctx.send(embed=embed)
+
+        except FileNotFoundError:
+            embed = discord.Embed(
+                title="Deck Decoding Error",
+                description="deckdecode.py not found. Ensure it is in the same directory as the bot.",
+                color=discord.Color.red()
+            )
+            await ctx.send(embed=embed)
+        except Exception as e:
+            embed = discord.Embed(
+                title="Unexpected Error",
+                description=f"An unexpected error occurred: ```{e}```",
+                color=discord.Color.red()
+            )
+            await ctx.send(embed=embed)              
