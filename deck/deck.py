@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from redbot.core import commands, app_commands
 import base64
 
 # --- Start of content from dl.txt ---
