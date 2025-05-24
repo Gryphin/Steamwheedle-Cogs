@@ -2,8 +2,7 @@ import discord
 from redbot.core import commands, app_commands
 import base64
 
-# --- Start of content from dl.txt ---
-# (Paste the entire content of dl.txt here, including the lookup dictionary and functions)
+# --- Start of content from dl.txt (unchanged from previous response) ---
 lookup = {
   0x39: {
     "name": "Malfurion",
@@ -766,6 +765,104 @@ def parse_loadout(input_string): # Renamed 'input' parameter to 'input_string' t
         return None
 # --- End of content from dl.txt ---
 
+# --- Updated: Local Image Paths ---
+# You MUST populate this with the correct filenames for your local images.
+# Example: "Malfurion": "malfurion.png" if you have images/malfurion.png
+UNIT_IMAGE_PATHS = {
+    "Malfurion": "malfurion.png",
+    "Priestess": "priestess.png",
+    "Headless Horseman": "headless-horseman.png",
+    "Druid of the Claw": "druid-of-the-claw.png",
+    "Treant": "treant.png",
+    "Eclipse": "eclipse.png",
+    "Dire Batlings": "dire-batlings.png",
+    "Anub'arak": "anubarak.png",
+    "Orgrim Doomhammer": "orgrim-doomhammer.png",
+    "Swole Troll": "swole-troll.png",
+    "Ysera the Dreamer": "ysera-the-dreamer.png",
+    "Dryad": "dryad.png",
+    "Witch Doctor": "witch-doctor.png",
+    "Quilboar": "quilboar.png",
+    "Whelp Eggs": "whelp-eggs.png",
+    "Execute": "execute.png",
+    "Gryphon Rider": "gryphon-rider.png",
+    "S.A.F.E. Pilot": "safe-pilot.png",
+    "Harpies": "harpies.png",
+    "Deep Breath": "deep-breath.png",
+    "Defias Bandits": "defias-bandits.png",
+    "Frostwolf Shaman": "frostwolf-shaman.png",
+    "Ghoul": "ghoul.png",
+    "Huntress": "huntress.png",
+    "Murloc Tidehunters": "murloc-tidehunters.png",
+    "Dark Iron Miner": "dark-iron-miner.png",
+    "Polymorph": "polymorph.png",
+    "Darkspear Troll": "darkspear-troll.png",
+    "Harvest Golem": "harvest-golem.png",
+    "Ancient of War": "ancient-of-war.png",
+    "Gargoyle": "gargoyle.png",
+    "Pyromancer": "pyromancer.png",
+    "Prowler": "prowler.png",
+    "Blizzard": "blizzard.png",
+    "Banshee": "banshee.png",
+    "Chimaera": "chimaera.png",
+    "Faerie Dragon": "faerie-dragon.png",
+    "General Drakkisath": "general-drakkisath.png",
+    "Stonehoof Tauren": "stonehoof-tauren.png",
+    "Fire Elemental": "fire-elemental.png",
+    "Tirion Fordring": "tirion-fordring.png",
+    "Baron Rivendare": "baron-rivendare.png",
+    "Jaina Proudmoore": "jaina-proudmoore.png",
+    "Old Murk-Eye": "old-murk-eye.png",
+    "Rend Blackhand": "rend-blackhand.png",
+    "Hogger": "hogger.png",
+    "Cairne Bloodhoof": "cairne-bloodhoof.png",
+    "Grommash Hellscream": "grommash-hellscream.png",
+    "Maiev Shadowsong": "maiev-shadowsong.png",
+    "Charlga Razorflank": "charlga-razorflank.png",
+    "Sylvanas Windrunner": "sylvanas-windrunner.png",
+    "Emperor Thaurissan": "emperor-thaurissan.png",
+    "Bloodmage Thalnos": "bloodmage-thalnos.png",
+    "Abomination": "abomination.png",
+    "Cheat Death": "cheat-death.png",
+    "Sneed": "sneed.png",
+    "Drake": "drake.png",
+    "Earth Elemental": "earth-elemental.png",
+    "Arcane Blast": "arcane-blast.png",
+    "Chain Lightning": "chain-lightning.png",
+    "Vultures": "vultures.png",
+    "Cenarius": "cenarius.png",
+    "Ragnaros": "ragnaros.png",
+    "Skeletons": "skeletons.png",
+    "Meat Wagon": "meat-wagon.png",
+    "Holy Nova": "holy-nova.png",
+    "Bat Rider": "bat-rider.png",
+    "Necromancer": "necromancer.png",
+    "Smoke Bomb": "smoke-bomb.png",
+    "Skeleton Party": "skeleton-party.png",
+    "Worgen": "worgen.png",
+    "Goblin Sapper": "goblin-sapper.png",
+    "Onu, Ancient of Lore": "onu-ancient-of-lore.png",
+    "Plague Farmer": "plague-farmer.png",
+    "Warsong Raider": "warsong-raider.png",
+    "Bog Beast": "bog-beast.png",
+    "Molten Giant": "molten-giant.png",
+    "Gnoll Brute": "gnoll-brute.png",
+    "Earth and Moon": "earth-and-moon.png",
+    "Moonkin": "moonkin.png",
+    "Footmen": "footmen.png",
+    "Flamewaker": "flamewaker.png",
+    "Ogre Mage": "ogre-mage.png",
+    "Angry Chickens": "angry-chickens.png",
+    "Core Hounds": "core-hounds.png",
+    "Firehammer": "firehammer.png",
+    "Raptors": "raptors.png",
+    "Living Bomb": "living-bomb.png",
+    "Warsong Grunts": "warsong-grunts.png",
+    "Spiderlings": "spiderlings.png",
+    "Mountaineer": "mountaineer.png",
+    # Add all other units with their corresponding filenames
+}
+
 class RumbloDecoder(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -773,26 +870,43 @@ class RumbloDecoder(commands.Cog):
     @commands.command(name="decode")
     async def decode_rumblo(self, ctx, code: str):
         """
-        Decodes a Rumblo loadout code and displays the units and their talents.
+        Decodes a Rumblo loadout code and displays the units and their talents with local images.
         Usage: !decode <rumblo_code>
         """
         if not code.startswith("rumblo:"):
             await ctx.send("Please provide a valid Rumblo code starting with 'rumblo:'.")
             return
 
-        loadout_info = parse_loadout(code) # Uses the function from dl.txt
+        loadout_info = parse_loadout(code)
 
         if loadout_info:
-            embed = discord.Embed(
-                title="Rumblo Loadout Decoded",
-                color=discord.Color.blue()
-            )
-
             for i, unit in enumerate(loadout_info):
                 name = unit.get("name", "Unknown Unit")
                 talent = unit.get("talent", "No Talent")
-                embed.add_field(name=f"Unit {i+1}", value=f"**Name:** {name}\n**Talent:** {talent}", inline=False)
-            
-            await ctx.send(embed=embed)
+
+                embed = discord.Embed(
+                    title=f"Unit {i+1}: {name}",
+                    description=f"**Talent:** {talent}",
+                    color=discord.Color.blue()
+                )
+
+                file_path = None
+                if name in UNIT_IMAGE_PATHS:
+                    # Construct the full path to the image file
+                    file_name = UNIT_IMAGE_PATHS[name]
+                    file_path = os.path.join("images", file_name)
+
+                if file_path and os.path.exists(file_path):
+                    # Create a discord.File object
+                    file = discord.File(file_path, filename=file_name)
+                    # Set the image of the embed to reference the attached file
+                    embed.set_image(url=f"attachment://{file_name}")
+                    # Send the embed and the file together
+                    await ctx.send(embed=embed, file=file)
+                else:
+                    # If image not found, send embed without image
+                    if file_path:
+                        await ctx.send(f"Warning: Image not found for {name} at {file_path}")
+                    await ctx.send(embed=embed)
         else:
             await ctx.send("Failed to decode the Rumblo code. Please check the code's validity.")
