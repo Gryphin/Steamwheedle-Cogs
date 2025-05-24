@@ -1,7 +1,7 @@
 import discord
 from redbot.core import commands, app_commands
 import base64
-
+import os
 # --- Start of content from dl.txt (unchanged from previous response) ---
 lookup = {
   0x39: {
