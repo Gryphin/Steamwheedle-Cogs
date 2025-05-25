@@ -2,6 +2,9 @@ import discord
 from redbot.core import commands, app_commands
 import base64
 import os
+import io
+from PIL import Image
+# --- Start of content from dl.txt (unchanged from previous response) ---
 # --- Start of content from dl.txt (unchanged from previous response) ---
 lookup = {
   0x39: {
@@ -910,3 +913,6 @@ class RumbloDecoder(commands.Cog):
                     await ctx.send(embed=embed)
         else:
             await ctx.send("Failed to decode the Rumblo code. Please check the code's validity.")
+
+async def setup(bot):
+    await bot.add_cog(RumbloDecoder(bot))
