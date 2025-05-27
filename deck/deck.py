@@ -1048,7 +1048,7 @@ def combine_unit_images(unit_names: List[str]) -> Optional[io.BytesIO]:
 
     return image_binary
                 # Create embed
-                embed = discord.Embed(
+    embed = discord.Embed(
                     title="Rumblo Loadout Decoded",
                     description="\n".join(unit_details),
                     color=discord.Color.blue()
