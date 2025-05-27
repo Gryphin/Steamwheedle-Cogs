@@ -1057,7 +1057,7 @@ def combine_unit_images(unit_names: List[str]) -> Optional[io.BytesIO]:
     embed.set_image(url="attachment://loadout.png")
 
                 # Send the embed with the combined image as a file
-                await ctx.send(embed=embed, file=discord.File(fp=image_binary, filename='loadout.png'))
+    await ctx.send(embed=embed, file=discord.File(fp=image_binary, filename='loadout.png'))
 
         else:
             await ctx.send("Failed to decode the Rumblo code. Please check the code's validity.")
