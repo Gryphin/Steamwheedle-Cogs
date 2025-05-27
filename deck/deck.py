@@ -2,12 +2,6 @@ import discord
 from redbot.core import commands, app_commands
 import base64
 import os
-import io
-from PIL import Image
-import discord
-from discord.ext import commands
-import base64
-import os
 from PIL import Image # Import Pillow
 import io # Import io for BytesIO
 
