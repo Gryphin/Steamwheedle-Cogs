@@ -892,9 +892,10 @@ class RumbloDecoder(commands.Cog):
                 unit_details.append(f"**Unit {i+1}:** {name} ({talent})")
 
                 file_path = None
+                current_file_path = os.path.abspath(__file__)
                 if name in UNIT_IMAGE_PATHS:
                     file_name = UNIT_IMAGE_PATHS[name]
-                    file_path = os.path.join("images", file_name)
+                    file_path = os.path.join(os.path.dirname(current_file_path), "images", file_name)
 
                 if file_path and os.path.exists(file_path):
                     try:
