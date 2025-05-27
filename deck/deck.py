@@ -917,34 +917,136 @@ class RumbloDecoder(commands.Cog):
                 await ctx.send(embed=embed)
                 return
 
-            # Combine images horizontally
-            # Assume all images are the same height, or resize them
-            widths, heights = zip(*(i.size for i in unit_images))
-            max_height = max(heights)
-            
-            # Optionally resize all images to a consistent height (e.g., 128px)
-            target_height = 128
-            resized_images = []
-            for img in unit_images:
-                if img.height != target_height:
-                    width = int(img.width * target_height / img.height)
-                    resized_images.append(img.resize((width, target_height), Image.Resampling.LANCZOS))
-                else:
-                    resized_images.append(img)
+def combine_unit_images(unit_names: List[str]) -> Optional[io.BytesIO]:
+    """
+    Combines images of units into a two-row layout:
+    First image 256x256, next 6 images 128x128 arranged in two rows.
+    Returns a BytesIO object containing the combined image, or None if no images are found.
+    """
+    if not unit_names:
+        return None
 
-            total_width = sum(i.width for i in resized_images)
-            combined_image = Image.new('RGBA', (total_width, target_height))
+    main_image: Optional[Image.Image] = None
+    small_images: List[Image.Image] = []
 
-            x_offset = 0
-            for img in resized_images:
-                combined_image.paste(img, (x_offset, 0))
-                x_offset += img.width
+    # Process the first image as 256x256
+    first_unit_name = unit_names[0]
+    file_name = UNIT_IMAGE_PATHS.get(first_unit_name)
+    if file_name:
+        file_path = os.path.join(UNIT_IMAGE_DIRECTORY, file_name)
+        if os.path.exists(file_path):
+            try:
+                img = Image.open(file_path).convert("RGBA")
+                main_image = img.resize((LARGE_IMAGE_HEIGHT, LARGE_IMAGE_HEIGHT), Image.Resampling.LANCZOS)
+            except Exception as e:
+                log.error(f"Could not open or process main image for {first_unit_name} at {file_path}: {e}")
+        else:
+            log.warning(f"Main image file not found for {first_unit_name} at {file_path}")
+    else:
+        log.info(f"No image path defined for main unit: {first_unit_name}")
 
-            # Save combined image to a BytesIO object
-            with io.BytesIO() as image_binary:
-                combined_image.save(image_binary, 'PNG')
-                image_binary.seek(0) # Rewind to the beginning of the stream
+    # Process the next 6 images as 128x128
+    for i in range(1, min(len(unit_names), 7)): # Iterate from the second unit up to a total of 7 (1 large + 6 small)
+        name = unit_names[i]
+        file_name = UNIT_IMAGE_PATHS.get(name)
+        if not file_name:
+            log.info(f"No image path defined for unit: {name}")
+            continue
 
+        file_path = os.path.join(UNIT_IMAGE_DIRECTORY, file_name)
+        if os.path.exists(file_path):
+            try:
+                img = Image.open(file_path).convert("RGBA")
+                img = img.resize((SMALL_IMAGE_HEIGHT, SMALL_IMAGE_HEIGHT), Image.Resampling.LANCZOS)
+                small_images.append(img)
+            except Exception as e:
+                log.error(f"Could not open or process small image for {name} at {file_path}: {e}")
+        else:
+            log.warning(f"Small image file not found for {name} at {file_path}")
+
+    if not main_image and not small_images:
+        return None
+
+    # Determine dimensions for the combined image
+    # Row 1: The large image (256x256)
+    # Row 2: Up to 3 small images (128x128 each)
+    # Row 3: Up to 3 small images (128x128 each)
+
+    # Calculate width of the small image rows. Max 3 images per row.
+    small_row_width = 0
+    if small_images:
+        # Assuming all small images are 128x128 after resize, so max width for 3 is 3 * 128 = 384
+        small_row_width = min(len(small_images), 3) * SMALL_IMAGE_HEIGHT # Since width == height for these
+
+    # Total width of the combined image
+    # It will be the maximum of the main image width or the small row width.
+    combined_width = max(main_image.width if main_image else 0, small_row_width)
+
+    # Total height of the combined image
+    # If main_image exists, add its height.
+    # If small_images exist, add height for two rows (2 * SMALL_IMAGE_HEIGHT).
+    combined_height = 0
+    if main_image:
+        combined_height += LARGE_IMAGE_HEIGHT
+    
+    if small_images:
+        if len(small_images) > 0:
+            combined_height += SMALL_IMAGE_HEIGHT # First row of small images
+        if len(small_images) > 3:
+            combined_height += SMALL_IMAGE_HEIGHT # Second row of small images
+
+    # If no main image, but small images exist, we still need a base height.
+    if not main_image and small_images:
+        combined_height = 0
+        if len(small_images) > 0:
+            combined_height += SMALL_IMAGE_HEIGHT # First row of small images
+        if len(small_images) > 3:
+            combined_height += SMALL_IMAGE_HEIGHT # Second row of small images
+        # Ensure minimum width is for 3 small images if small images are the only content
+        combined_width = max(combined_width, 3 * SMALL_IMAGE_HEIGHT)
+
+
+    if combined_width == 0 or combined_height == 0: # No images to combine
+        return None
+
+    combined_image = Image.new('RGBA', (combined_width, combined_height))
+
+    current_y_offset = 0
+
+    # Paste the main image
+    if main_image:
+        # Center the large image if the small rows are wider
+        x_offset_main = (combined_width - main_image.width) // 2
+        combined_image.paste(main_image, (x_offset_main, current_y_offset))
+        current_y_offset += main_image.height
+
+    # Paste small images in two rows
+    small_images_pasted = 0
+    for row in range(2):
+        if small_images_pasted >= len(small_images):
+            break # No more small images to paste
+
+        x_offset = 0
+        # Calculate horizontal offset to center the small images row
+        current_row_images = small_images[small_images_pasted:small_images_pasted + 3]
+        current_row_width = sum(img.width for img in current_row_images)
+        x_start_row = (combined_width - current_row_width) // 2
+
+        for i, img in enumerate(current_row_images):
+            combined_image.paste(img, (x_start_row + x_offset, current_y_offset))
+            x_offset += img.width
+            small_images_pasted += 1
+        current_y_offset += SMALL_IMAGE_HEIGHT
+
+    image_binary = io.BytesIO()
+    try:
+        combined_image.save(image_binary, 'PNG')
+        image_binary.seek(0)
+    except Exception as e:
+        log.error(f"Failed to save combined image to BytesIO: {e}")
+        return None
+
+    return image_binary
                 # Create embed
                 embed = discord.Embed(
                     title="Rumblo Loadout Decoded",
