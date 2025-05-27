@@ -1054,7 +1054,7 @@ def combine_unit_images(unit_names: List[str]) -> Optional[io.BytesIO]:
                     color=discord.Color.blue()
                 )
                 # Set the combined image as the embed's image
-                embed.set_image(url="attachment://loadout.png")
+    embed.set_image(url="attachment://loadout.png")
 
                 # Send the embed with the combined image as a file
                 await ctx.send(embed=embed, file=discord.File(fp=image_binary, filename='loadout.png'))
