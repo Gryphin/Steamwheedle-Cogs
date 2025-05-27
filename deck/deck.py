@@ -2,10 +2,27 @@ import discord
 from redbot.core import commands, app_commands
 import base64
 import os
-from PIL import Image # Import Pillow
-import io # Import io for BytesIO
+from PIL import Image
+import io
+from typing import List, Dict, Optional, NamedTuple
+import logging
 
-# --- Start of content from dl.txt (unchanged from previous response) ---
+log = logging.getLogger(__name__)
+
+# --- Constants ---
+UNIT_IMAGE_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "images")
+LARGE_IMAGE_HEIGHT = 256
+SMALL_IMAGE_HEIGHT = 128
+RUMBLO_CODE_PREFIX = "rumblo:"
+UNIT_DELIMITER_BYTE = 0x1a #cite: 38
+LEADER_UNIT_BYTE_IDENTIFIER = 0x08 #cite: 39
+
+# Define a NamedTuple for better unit data structure
+class RumbloUnit(NamedTuple):
+    name: str
+    talent: Optional[str] = None
+
+# (lookup dictionary remains here, unchanged)
 lookup = {
   0x39: {
     "name": "Malfurion",
@@ -736,37 +753,8 @@ lookup = {
     ],
   }
 }
-
-def get_unit(bytes_data, unit_type_idx, talent_idx): # Renamed 'bytes' parameter to 'bytes_data' to avoid conflict with built-in 'bytes'
-    unit_info = lookup[bytes_data[unit_type_idx]] # cite: 1
-    unit = { "name": unit_info["name"] } # cite: 1
-
-    if len(bytes_data) > 4: # cite: 38
-        unit["talent"] = unit_info["talents"][bytes_data[talent_idx]] # cite: 38
-
-    return unit # cite: 38
-
-def parse_loadout(input_string): # Renamed 'input' parameter to 'input_string' to avoid conflict with built-in 'input'
-    try:
-        payload = base64.b64decode(bytearray(input_string.replace("rumblo:", ""), "utf-8")) # cite: 38
-
-        units = [] # cite: 38
-        unit_bytes = [] # cite: 38
-        for i in range(len(payload)): # cite: 38
-            unit_bytes.append(payload[i]) # cite: 38
-
-            if payload[i] == 0x1a or i == len(payload) - 1: # cite: 38
-                parsing_leader = unit_bytes[0] == 0x08 # cite: 39
-                byte_start = 1 if parsing_leader else 2 # cite: 39
-                unit = get_unit(bytes_data=unit_bytes, unit_type_idx=byte_start, talent_idx=byte_start + 2) # cite: 39
-                units.append(unit) # cite: 39
-                unit_bytes = [] # cite: 40
-                
-        return units # cite: 40
-    except Exception as err:
-        print("Error:", err) # cite: 40
-        return None
 # --- End of content from dl.txt ---
+
 
 # --- Updated: Local Image Paths (Ensure these match your actual filenames) ---
 UNIT_IMAGE_PATHS = {
@@ -864,58 +852,74 @@ UNIT_IMAGE_PATHS = {
     # Add all other units with their corresponding filenames
 }
 
-class RumbloDecoder(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
+def get_unit(bytes_data: bytearray, unit_type_idx: int, talent_idx: int) -> RumbloUnit:
+    """
+    Retrieves unit name and talent from lookup based on byte data.
+    """
+    unit_info = lookup.get(bytes_data[unit_type_idx]) #cite: 1
+    if not unit_info:
+        log.warning(f"Unknown unit type byte: {bytes_data[unit_type_idx]:#0x}")
+        return RumbloUnit(name="Unknown Unit", talent="N/A")
 
-    @commands.command(name="decode")
-    async def decode_rumblo(self, ctx, code: str):
-        """
-        Decodes a Rumblo loadout code and displays the units and their talents,
-        combining unit images using Pillow.
-        Usage: !decode <rumblo_code>
-        """
-        if not code.startswith("rumblo:"):
-            await ctx.send("Please provide a valid Rumblo code starting with 'rumblo:'.")
-            return
+    unit_name = unit_info["name"] #cite: 1
+    unit_talent = None
+    if len(bytes_data) > 4: #cite: 38
+        try:
+            unit_talent = unit_info["talents"][bytes_data[talent_idx]] #cite: 38
+        except IndexError:
+            log.warning(f"Invalid talent index {bytes_data[talent_idx]} for unit {unit_name}")
+            unit_talent = "Invalid Talent Index"
+        except KeyError:
+            log.warning(f"Talents not found for unit {unit_name}")
+            unit_talent = "No Talent Info"
 
-        loadout_info = parse_loadout(code)
+    return RumbloUnit(name=unit_name, talent=unit_talent) #cite: 38
 
-        if loadout_info:
-            unit_images = []
-            unit_details = []
+def parse_loadout(input_string: str) -> Optional[List[RumbloUnit]]:
+    """
+    Decodes a Rumblo loadout string into a list of RumbloUnit objects.
+    Raises ValueError for invalid input.
+    """
+    if not input_string.startswith(RUMBLO_CODE_PREFIX):
+        raise ValueError("Invalid Rumblo code format: missing prefix.")
 
-            # Collect images and details
-            for i, unit in enumerate(loadout_info):
-                name = unit.get("name", "Unknown Unit")
-                talent = unit.get("talent", "No Talent")
-                unit_details.append(f"**Unit {i+1}:** {name} ({talent})")
+    try:
+        payload = base64.b64decode(bytearray(input_string.replace(RUMBLO_CODE_PREFIX, ""), "utf-8")) #cite: 38
+    except (base64.binascii.Error, UnicodeDecodeError) as e:
+        log.error(f"Base64 decoding error: {e}")
+        raise ValueError("Failed to decode Rumblo code: invalid base64 format.") from e
+    except Exception as e:
+        log.error(f"Unexpected error during payload decoding: {e}")
+        raise ValueError("An unexpected error occurred during decoding.") from e
 
-                file_path = None
-                current_file_path = os.path.abspath(__file__)
-                if name in UNIT_IMAGE_PATHS:
-                    file_name = UNIT_IMAGE_PATHS[name]
-                    file_path = os.path.join(os.path.dirname(current_file_path), "images", file_name)
+    units: List[RumbloUnit] = [] #cite: 38
+    unit_bytes: List[int] = [] #cite: 38
+    
+    for i in range(len(payload)): #cite: 38
+        unit_bytes.append(payload[i]) #cite: 38
 
-                if file_path and os.path.exists(file_path):
-                    try:
-                        img = Image.open(file_path).convert("RGBA")
-                        unit_images.append(img)
-                    except Exception as e:
-                        print(f"Could not open image for {name}: {e}")
-                        # Optionally add a placeholder image or skip
-                else:
-                    print(f"Warning: Image file not found for {name} at {file_path}")
+        if payload[i] == UNIT_DELIMITER_BYTE or i == len(payload) - 1: #cite: 38
+            if not unit_bytes:
+                log.warning("Empty unit_bytes encountered before delimiter, skipping.")
+                continue
 
-            if not unit_images:
-                await ctx.send("No images found for the units in this loadout. Displaying text details only.")
-                embed = discord.Embed(
-                    title="Rumblo Loadout Decoded (No Images)",
-                    description="\n".join(unit_details),
-                    color=discord.Color.red()
-                )
-                await ctx.send(embed=embed)
-                return
+            parsing_leader = unit_bytes[0] == LEADER_UNIT_BYTE_IDENTIFIER #cite: 39
+            byte_start = 1 if parsing_leader else 2 #cite: 39
+            
+            if byte_start + 2 >= len(unit_bytes):
+                log.warning(f"Malformed unit data segment: {unit_bytes}. Skipping unit.")
+                unit_bytes = []
+                continue
+
+            unit = get_unit(bytes_data=bytearray(unit_bytes), unit_type_idx=byte_start, talent_idx=byte_start + 2) #cite: 39
+            units.append(unit) #cite: 39
+            unit_bytes = [] #cite: 40
+            
+    if not units:
+        raise ValueError("No units could be parsed from the provided code.")
+        
+    return units #cite: 40
+
 
 def combine_unit_images(unit_names: List[str]) -> Optional[io.BytesIO]:
     """
@@ -1047,20 +1051,49 @@ def combine_unit_images(unit_names: List[str]) -> Optional[io.BytesIO]:
         return None
 
     return image_binary
-    # Create embed
-    embed = discord.Embed(
-      title="Rumblo Loadout Decoded",
-      description="\n".join(unit_details),
-      color=discord.Color.blue()
-                )
-    # Set the combined image as the embed's image
-    embed.set_image(url="attachment://loadout.png")
 
-    # Send the embed with the combined image as a file
-    await ctx.send(embed=embed, file=discord.File(fp=image_binary, filename='loadout.png'))
 
-    #else:
-    #        await ctx.send("Failed to decode the Rumblo code. Please check the code's validity.")
+class RumbloDecoder(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command(name="decode")
+    async def decode_rumblo(self, ctx: commands.Context, code: str):
+        """
+        Decodes a Rumblo loadout code and displays the units and their talents,
+        combining unit images using Pillow.
+        Usage: !decode <rumblo_code>
+        """
+        try:
+            loadout_info = parse_loadout(code)
+        except ValueError as e:
+            await ctx.send(f"Decoding error: {e}")
+            return
+
+        unit_details_text: List[str] = []
+        unit_names_for_images: List[str] = []
+        for i, unit in enumerate(loadout_info):
+            unit_details_text.append(f"**Unit {i+1}:** {unit.name} ({unit.talent or 'No Talent'})")
+            unit_names_for_images.append(unit.name)
+
+        # Pass all unit names to the image combiner, it will handle the sizing logic
+        combined_image_stream = combine_unit_images(unit_names_for_images)
+
+        if combined_image_stream:
+            embed = discord.Embed(
+                title="Rumblo Loadout Decoded",
+                description="\n".join(unit_details_text),
+                color=discord.Color.blue()
+            )
+            embed.set_image(url="attachment://loadout.png")
+            await ctx.send(embed=embed, file=discord.File(fp=combined_image_stream, filename='loadout.png'))
+        else:
+            embed = discord.Embed(
+                title="Rumblo Loadout Decoded (No Images Available)",
+                description="\n".join(unit_details_text) + "\n\n*No unit images could be loaded or combined.*",
+                color=discord.Color.orange()
+            )
+            await ctx.send(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(RumbloDecoder(bot))
