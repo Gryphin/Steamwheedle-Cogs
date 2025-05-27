@@ -894,6 +894,7 @@ class RumbloDecoder(commands.Cog):
                 )
 
                 file_path = None
+                current_file_path = os.path.abspath(__file__)
                 if name in UNIT_IMAGE_PATHS:
                     # Construct the full path to the image file
                     file_name = UNIT_IMAGE_PATHS[name]
