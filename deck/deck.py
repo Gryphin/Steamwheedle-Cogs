@@ -4,7 +4,13 @@ import base64
 import os
 import io
 from PIL import Image
-# --- Start of content from dl.txt (unchanged from previous response) ---
+import discord
+from discord.ext import commands
+import base64
+import os
+from PIL import Image # Import Pillow
+import io # Import io for BytesIO
+
 # --- Start of content from dl.txt (unchanged from previous response) ---
 lookup = {
   0x39: {
@@ -768,9 +774,7 @@ def parse_loadout(input_string): # Renamed 'input' parameter to 'input_string' t
         return None
 # --- End of content from dl.txt ---
 
-# --- Updated: Local Image Paths ---
-# You MUST populate this with the correct filenames for your local images.
-# Example: "Malfurion": "malfurion.png" if you have images/malfurion.png
+# --- Updated: Local Image Paths (Ensure these match your actual filenames) ---
 UNIT_IMAGE_PATHS = {
     "Malfurion": "malfurion.png",
     "Priestess": "priestess.png",
@@ -873,7 +877,8 @@ class RumbloDecoder(commands.Cog):
     @commands.command(name="decode")
     async def decode_rumblo(self, ctx, code: str):
         """
-        Decodes a Rumblo loadout code and displays the units and their talents with local images.
+        Decodes a Rumblo loadout code and displays the units and their talents,
+        combining unit images using Pillow.
         Usage: !decode <rumblo_code>
         """
         if not code.startswith("rumblo:"):
@@ -883,35 +888,80 @@ class RumbloDecoder(commands.Cog):
         loadout_info = parse_loadout(code)
 
         if loadout_info:
+            unit_images = []
+            unit_details = []
+
+            # Collect images and details
             for i, unit in enumerate(loadout_info):
                 name = unit.get("name", "Unknown Unit")
                 talent = unit.get("talent", "No Talent")
-
-                embed = discord.Embed(
-                    title=f"Unit {i+1}: {name}",
-                    description=f"**Talent:** {talent}",
-                    color=discord.Color.blue()
-                )
+                unit_details.append(f"**Unit {i+1}:** {name} ({talent})")
 
                 file_path = None
-                current_file_path = os.path.abspath(__file__)
                 if name in UNIT_IMAGE_PATHS:
-                    # Construct the full path to the image file
                     file_name = UNIT_IMAGE_PATHS[name]
-                    file_path = os.path.join(os.path.dirname(current_file_path), "images", file_name)
+                    file_path = os.path.join("images", file_name)
 
                 if file_path and os.path.exists(file_path):
-                    # Create a discord.File object
-                    file = discord.File(file_path, filename=file_name)
-                    # Set the image of the embed to reference the attached file
-                    embed.set_image(url=f"attachment://{file_name}")
-                    # Send the embed and the file together
-                    await ctx.send(embed=embed, file=file)
+                    try:
+                        img = Image.open(file_path).convert("RGBA")
+                        unit_images.append(img)
+                    except Exception as e:
+                        print(f"Could not open image for {name}: {e}")
+                        # Optionally add a placeholder image or skip
                 else:
-                    # If image not found, send embed without image
-                    if file_path:
-                        await ctx.send(f"Warning: Image not found for {name} at {file_path}")
-                    await ctx.send(embed=embed)
+                    print(f"Warning: Image file not found for {name} at {file_path}")
+
+            if not unit_images:
+                await ctx.send("No images found for the units in this loadout. Displaying text details only.")
+                embed = discord.Embed(
+                    title="Rumblo Loadout Decoded (No Images)",
+                    description="\n".join(unit_details),
+                    color=discord.Color.red()
+                )
+                await ctx.send(embed=embed)
+                return
+
+            # Combine images horizontally
+            # Assume all images are the same height, or resize them
+            widths, heights = zip(*(i.size for i in unit_images))
+            max_height = max(heights)
+            
+            # Optionally resize all images to a consistent height (e.g., 128px)
+            target_height = 128
+            resized_images = []
+            for img in unit_images:
+                if img.height != target_height:
+                    width = int(img.width * target_height / img.height)
+                    resized_images.append(img.resize((width, target_height), Image.Resampling.LANCZOS))
+                else:
+                    resized_images.append(img)
+
+            total_width = sum(i.width for i in resized_images)
+            combined_image = Image.new('RGBA', (total_width, target_height))
+
+            x_offset = 0
+            for img in resized_images:
+                combined_image.paste(img, (x_offset, 0))
+                x_offset += img.width
+
+            # Save combined image to a BytesIO object
+            with io.BytesIO() as image_binary:
+                combined_image.save(image_binary, 'PNG')
+                image_binary.seek(0) # Rewind to the beginning of the stream
+
+                # Create embed
+                embed = discord.Embed(
+                    title="Rumblo Loadout Decoded",
+                    description="\n".join(unit_details),
+                    color=discord.Color.blue()
+                )
+                # Set the combined image as the embed's image
+                embed.set_image(url="attachment://loadout.png")
+
+                # Send the embed with the combined image as a file
+                await ctx.send(embed=embed, file=discord.File(fp=image_binary, filename='loadout.png'))
+
         else:
             await ctx.send("Failed to decode the Rumblo code. Please check the code's validity.")
 
