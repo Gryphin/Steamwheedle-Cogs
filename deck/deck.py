@@ -898,7 +898,7 @@ class RumbloDecoder(commands.Cog):
                 if name in UNIT_IMAGE_PATHS:
                     # Construct the full path to the image file
                     file_name = UNIT_IMAGE_PATHS[name]
-                    file_path = os.path.join(os.path.dirname(current_file_path), file_name)
+                    file_path = os.path.join(os.path.dirname(current_file_path), images, file_name)
 
                 if file_path and os.path.exists(file_path):
                     # Create a discord.File object
