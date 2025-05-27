@@ -1047,20 +1047,20 @@ def combine_unit_images(unit_names: List[str]) -> Optional[io.BytesIO]:
         return None
 
     return image_binary
-                # Create embed
+    # Create embed
     embed = discord.Embed(
-                    title="Rumblo Loadout Decoded",
-                    description="\n".join(unit_details),
-                    color=discord.Color.blue()
+      title="Rumblo Loadout Decoded",
+      description="\n".join(unit_details),
+      color=discord.Color.blue()
                 )
-                # Set the combined image as the embed's image
+    # Set the combined image as the embed's image
     embed.set_image(url="attachment://loadout.png")
 
-                # Send the embed with the combined image as a file
+    # Send the embed with the combined image as a file
     await ctx.send(embed=embed, file=discord.File(fp=image_binary, filename='loadout.png'))
 
-    else:
-            await ctx.send("Failed to decode the Rumblo code. Please check the code's validity.")
+    #else:
+    #        await ctx.send("Failed to decode the Rumblo code. Please check the code's validity.")
 
 async def setup(bot):
     await bot.add_cog(RumbloDecoder(bot))
