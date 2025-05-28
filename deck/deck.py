@@ -760,7 +760,6 @@ lookup = {
         "Purgatory"
     ],
   },
-  }
 }
 # --- End of content from dl.txt ---
 
