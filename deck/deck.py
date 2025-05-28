@@ -752,12 +752,12 @@ lookup = {
       "Intimidation",
     ],
     0x5e: {
-    "name": "Arthas Menethil",
-    "talents": [
-      "Death Grip",
-      "Necrotic Plague",
-      "Purgatory"
-    ]
+      "name": "Arthas Menethil",
+      "talents": [
+        "Death Grip",
+        "Necrotic Plague",
+        "Purgatory"
+    ],
   },
   }
 }
