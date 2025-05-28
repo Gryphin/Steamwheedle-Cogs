@@ -751,6 +751,7 @@ lookup = {
       "Mend Pets",
       "Intimidation",
     ],
+  },
     0x5e: {
       "name": "Arthas Menethil",
       "talents": [
