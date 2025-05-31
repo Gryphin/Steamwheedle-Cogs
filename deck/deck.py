@@ -1065,9 +1065,10 @@ def combine_unit_images(unit_names: List[str]) -> Optional[io.BytesIO]:
 class RumbloDecoder(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-    @commands.command(name="decode")
-    async def decode_rumblo(self, ctx: commands.Context, code: str):
+    @app_commands.command()
+    async def decode_rumblo(self, interaction: discord.Interaction):
+    #@commands.command(name="decode")
+    #async def decode_rumblo(self, ctx: commands.Context, code: str):
         """
         Decodes a Rumblo loadout code and displays the units and their talents,
         combining unit images using Pillow.
