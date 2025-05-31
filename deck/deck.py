@@ -752,9 +752,16 @@ lookup = {
       "Mend Pets",
       "Intimidation",
     ],
-  }
+  0x5e: {
+      "name": "Arthas Menethil",
+      "talents": [
+        "Death Grip",
+        "Necrotic Plague",
+        "Purgatory"
+    ],
+  },
 }
-
+# --- End of content from dl.txt ---
 # --- Updated: Local Image Paths (Ensure these match your actual filenames) ---
 UNIT_IMAGE_PATHS = {
     "Malfurion": "malfurion.png",
