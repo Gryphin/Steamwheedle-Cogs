@@ -1076,9 +1076,9 @@ class RumbloDecoder(commands.Cog):
         """
         #try:
         loadout_info = parse_loadout(code)
-            except ValueError as e:
-                await ctx.send(f"Decoding error: {e}")
-                return
+        except ValueError as e:
+        await ctx.send(f"Decoding error: {e}")
+        return
 
         unit_details_text: List[str] = []
         unit_names_for_images: List[str] = []
