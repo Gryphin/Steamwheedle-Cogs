@@ -11,9 +11,9 @@ log = logging.getLogger(__name__)
 
 # --- Constants ---
 UNIT_IMAGE_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "images")
-LARGE_IMAGE_HEIGHT = 256
-SMALL_IMAGE_HEIGHT = 128
-RUMBLO_CODE_PREFIX = "rumblo:"
+LARGE_IMAGE_SIZE = (256, 256) # Size for the leader image
+SMALL_IMAGE_SIZE = (128, 128) # Size for the other unit images
+RUMBLO_CODE_PREFIX = "rumblo:" #cite: 38
 UNIT_DELIMITER_BYTE = 0x1a #cite: 38
 LEADER_UNIT_BYTE_IDENTIFIER = 0x08 #cite: 39
 
@@ -625,6 +625,7 @@ lookup = {
     ],
   },
   0x15: {
+
     "name": "Bog Beast",
     "talents": [
       "Flourish",
@@ -751,18 +752,8 @@ lookup = {
       "Mend Pets",
       "Intimidation",
     ],
-  },
-    0x5e: {
-      "name": "Arthas Menethil",
-      "talents": [
-        "Death Grip",
-        "Necrotic Plague",
-        "Purgatory"
-    ],
-  },
+  }
 }
-# --- End of content from dl.txt ---
-
 
 # --- Updated: Local Image Paths (Ensure these match your actual filenames) ---
 UNIT_IMAGE_PATHS = {
@@ -857,7 +848,6 @@ UNIT_IMAGE_PATHS = {
     "Warsong Grunts": "warsong-grunts.png",
     "Spiderlings": "spiderlings.png",
     "Mountaineer": "mountaineer.png",
-    "Arthas Menethil": "arthas-menethil.png"
     # Add all other units with their corresponding filenames
 }
 
@@ -929,36 +919,35 @@ def parse_loadout(input_string: str) -> Optional[List[RumbloUnit]]:
         
     return units #cite: 40
 
-
 def combine_unit_images(unit_names: List[str]) -> Optional[io.BytesIO]:
     """
     Combines images of units into a two-row layout:
-    First image 256x256, next 6 images 128x128 arranged in two rows.
+    First image 256x256, next up to 6 images 128x128 arranged in two rows of three.
     Returns a BytesIO object containing the combined image, or None if no images are found.
     """
     if not unit_names:
         return None
 
+    # Load and resize the main image (first unit)
     main_image: Optional[Image.Image] = None
-    small_images: List[Image.Image] = []
-
-    # Process the first image as 256x256
-    first_unit_name = unit_names[0]
-    file_name = UNIT_IMAGE_PATHS.get(first_unit_name)
-    if file_name:
-        file_path = os.path.join(UNIT_IMAGE_DIRECTORY, file_name)
-        if os.path.exists(file_path):
-            try:
-                img = Image.open(file_path).convert("RGBA")
-                main_image = img.resize((LARGE_IMAGE_HEIGHT, LARGE_IMAGE_HEIGHT), Image.Resampling.LANCZOS)
-            except Exception as e:
-                log.error(f"Could not open or process main image for {first_unit_name} at {file_path}: {e}")
+    if unit_names:
+        first_unit_name = unit_names[0]
+        file_name = UNIT_IMAGE_PATHS.get(first_unit_name)
+        if file_name:
+            file_path = os.path.join(UNIT_IMAGE_DIRECTORY, file_name)
+            if os.path.exists(file_path):
+                try:
+                    img = Image.open(file_path).convert("RGBA")
+                    main_image = img.resize(LARGE_IMAGE_SIZE, Image.Resampling.LANCZOS)
+                except Exception as e:
+                    log.error(f"Could not open or process main image for {first_unit_name} at {file_path}: {e}")
+            else:
+                log.warning(f"Main image file not found for {first_unit_name} at {file_path}")
         else:
-            log.warning(f"Main image file not found for {first_unit_name} at {file_path}")
-    else:
-        log.info(f"No image path defined for main unit: {first_unit_name}")
+            log.info(f"No image path defined for main unit: {first_unit_name}")
 
-    # Process the next 6 images as 128x128
+    # Load and resize the small images (up to next 6 units)
+    small_images: List[Image.Image] = []
     for i in range(1, min(len(unit_names), 7)): # Iterate from the second unit up to a total of 7 (1 large + 6 small)
         name = unit_names[i]
         file_name = UNIT_IMAGE_PATHS.get(name)
@@ -970,7 +959,7 @@ def combine_unit_images(unit_names: List[str]) -> Optional[io.BytesIO]:
         if os.path.exists(file_path):
             try:
                 img = Image.open(file_path).convert("RGBA")
-                img = img.resize((SMALL_IMAGE_HEIGHT, SMALL_IMAGE_HEIGHT), Image.Resampling.LANCZOS)
+                img = img.resize(SMALL_IMAGE_SIZE, Image.Resampling.LANCZOS)
                 small_images.append(img)
             except Exception as e:
                 log.error(f"Could not open or process small image for {name} at {file_path}: {e}")
@@ -980,76 +969,75 @@ def combine_unit_images(unit_names: List[str]) -> Optional[io.BytesIO]:
     if not main_image and not small_images:
         return None
 
-    # Determine dimensions for the combined image
-    # Row 1: The large image (256x256)
-    # Row 2: Up to 3 small images (128x128 each)
-    # Row 3: Up to 3 small images (128x128 each)
+    # Determine overall canvas dimensions
+    # The layout is:
+    # [Large Image (256x256)]
+    # [Small Image 1][Small Image 2][Small Image 3]
+    # [Small Image 4][Small Image 5][Small Image 6]
 
-    # Calculate width of the small image rows. Max 3 images per row.
-    small_row_width = 0
-    if small_images:
-        # Assuming all small images are 128x128 after resize, so max width for 3 is 3 * 128 = 384
-        small_row_width = min(len(small_images), 3) * SMALL_IMAGE_HEIGHT # Since width == height for these
+    # Calculate width of the small image rows (max 3 images per row)
+    # The maximum width for a row of 3 small images is 3 * 128 = 384
+    small_rows_max_width = 3 * SMALL_IMAGE_SIZE[0]
 
-    # Total width of the combined image
-    # It will be the maximum of the main image width or the small row width.
-    combined_width = max(main_image.width if main_image else 0, small_row_width)
+    # Combined image width will be the max of the large image width or the small rows width
+    combined_width = max(LARGE_IMAGE_SIZE[0] if main_image else 0, small_rows_max_width)
 
-    # Total height of the combined image
-    # If main_image exists, add its height.
-    # If small_images exist, add height for two rows (2 * SMALL_IMAGE_HEIGHT).
     combined_height = 0
     if main_image:
-        combined_height += LARGE_IMAGE_HEIGHT
-    
+        combined_height += LARGE_IMAGE_SIZE[1] # Height for the large image
+
+    # Add height for small image rows
     if small_images:
+        # First row of small images
         if len(small_images) > 0:
-            combined_height += SMALL_IMAGE_HEIGHT # First row of small images
+            combined_height += SMALL_IMAGE_SIZE[1]
+        # Second row of small images (if more than 3)
         if len(small_images) > 3:
-            combined_height += SMALL_IMAGE_HEIGHT # Second row of small images
-
-    # If no main image, but small images exist, we still need a base height.
+            combined_height += SMALL_IMAGE_SIZE[1]
+    
+    # If no main image but small images exist, ensure a valid height
     if not main_image and small_images:
-        combined_height = 0
+        combined_height = 0 # Reset if main image was the only contributor
         if len(small_images) > 0:
-            combined_height += SMALL_IMAGE_HEIGHT # First row of small images
+            combined_height += SMALL_IMAGE_SIZE[1]
         if len(small_images) > 3:
-            combined_height += SMALL_IMAGE_HEIGHT # Second row of small images
-        # Ensure minimum width is for 3 small images if small images are the only content
-        combined_width = max(combined_width, 3 * SMALL_IMAGE_HEIGHT)
+            combined_height += SMALL_IMAGE_SIZE[1]
+        
+        # If only small images, ensure width is at least for a full row of 3 small images
+        combined_width = max(combined_width, small_rows_max_width)
 
-
-    if combined_width == 0 or combined_height == 0: # No images to combine
-        return None
+    if combined_width == 0 or combined_height == 0:
+        return None # Should not happen if main_image or small_images exist, but as a safeguard
 
     combined_image = Image.new('RGBA', (combined_width, combined_height))
 
     current_y_offset = 0
 
-    # Paste the main image
+    # Paste the main image (leader)
     if main_image:
-        # Center the large image if the small rows are wider
+        # Center the large image horizontally
         x_offset_main = (combined_width - main_image.width) // 2
         combined_image.paste(main_image, (x_offset_main, current_y_offset))
         current_y_offset += main_image.height
 
-    # Paste small images in two rows
-    small_images_pasted = 0
-    for row in range(2):
-        if small_images_pasted >= len(small_images):
-            break # No more small images to paste
+    # Paste small images in rows
+    small_images_to_paste = list(small_images) # Create a mutable copy
+    
+    for row_num in range(2): # Two rows for small images
+        if not small_images_to_paste:
+            break
 
-        x_offset = 0
-        # Calculate horizontal offset to center the small images row
-        current_row_images = small_images[small_images_pasted:small_images_pasted + 3]
+        current_row_images = small_images_to_paste[:3] # Get up to 3 images for the current row
+        small_images_to_paste = small_images_to_paste[3:] # Remove them from the list
+
         current_row_width = sum(img.width for img in current_row_images)
-        x_start_row = (combined_width - current_row_width) // 2
+        x_offset = (combined_width - current_row_width) // 2 # Center the row
 
-        for i, img in enumerate(current_row_images):
-            combined_image.paste(img, (x_start_row + x_offset, current_y_offset))
+        for img in current_row_images:
+            combined_image.paste(img, (x_offset, current_y_offset))
             x_offset += img.width
-            small_images_pasted += 1
-        current_y_offset += SMALL_IMAGE_HEIGHT
+        
+        current_y_offset += SMALL_IMAGE_SIZE[1] # Move to the next row's starting y-coordinate
 
     image_binary = io.BytesIO()
     try:
@@ -1065,20 +1053,24 @@ def combine_unit_images(unit_names: List[str]) -> Optional[io.BytesIO]:
 class RumbloDecoder(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-    @app_commands.command()
-    async def decode_rumblo(self, ctx: commands.Context, code: app_commands.Choice[str]):
-    #@commands.command(name="decode")
-    #async def decode_rumblo(self, ctx: commands.Context, code: str):
+
+    # Refactored to use a slash command
+    @app_commands.command(name="decode", description="Decodes a Rumblo loadout code and displays units/talents.")
+    @app_commands.describe(code="The Rumblo loadout code (e.g., 'rumblo:...')")
+    async def decode_rumblo(self, interaction: discord.Interaction, code: str):
         """
         Decodes a Rumblo loadout code and displays the units and their talents,
         combining unit images using Pillow.
-        Usage: !decode <rumblo_code>
+        Usage: /decode <rumblo_code>
         """
-        #try:
-        loadout_info = parse_loadout(code)
-        #except ValueError as e:
-        #await ctx.send(f"Decoding error: {e}")
-        #return
+        # Acknowledge the interaction immediately to prevent timeout
+        await interaction.response.defer()
+
+        try:
+            loadout_info = parse_loadout(code)
+        except ValueError as e:
+            await interaction.followup.send(f"Decoding error: {e}")
+            return
 
         unit_details_text: List[str] = []
         unit_names_for_images: List[str] = []
@@ -1086,7 +1078,6 @@ class RumbloDecoder(commands.Cog):
             unit_details_text.append(f"**Unit {i+1}:** {unit.name} ({unit.talent or 'No Talent'})")
             unit_names_for_images.append(unit.name)
 
-        # Pass all unit names to the image combiner, it will handle the sizing logic
         combined_image_stream = combine_unit_images(unit_names_for_images)
 
         if combined_image_stream:
@@ -1096,14 +1087,18 @@ class RumbloDecoder(commands.Cog):
                 color=discord.Color.blue()
             )
             embed.set_image(url="attachment://loadout.png")
-            await ctx.send(embed=embed, file=discord.File(fp=combined_image_stream, filename='loadout.png'))
+            await interaction.followup.send(embed=embed, file=discord.File(fp=combined_image_stream, filename='loadout.png'))
         else:
             embed = discord.Embed(
                 title="Rumblo Loadout Decoded (No Images Available)",
                 description="\n".join(unit_details_text) + "\n\n*No unit images could be loaded or combined.*",
                 color=discord.Color.orange()
             )
-            await ctx.send(embed=embed)
+            await interaction.followup.send(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(RumbloDecoder(bot))
+    # Sync slash commands with Discord. This is crucial for them to appear.
+    # For global commands, it's recommended to do this only once during bot startup or on changes.
+    # For testing, you might sync to a specific guild.
+    await bot.tree.sync()
