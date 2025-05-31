@@ -4,6 +4,7 @@ Cog Function
 
 | Name | Status | Description (Click to see full status)
 | --- | --- | --- |
+| deck | **Alpha** | <details><summary>Decodes deck string and posts as embed</summary>Just released, please report bugs as you find them. Only works for bot owner for now</details> |
 | fifo | **Alpha** | <details><summary>Schedule commands to be run at certain times or intervals</summary>Just released, please report bugs as you find them. Only works for bot owner for now</details> |
 | recruit | **Alpha** | <details><summary>Pulls data from spreadsheet, then displays output in channel</summary>Can be invoked with [p]recruit</details> |
 | RedditPost |	0.6.0	| Reddit Autoposting of new content.
