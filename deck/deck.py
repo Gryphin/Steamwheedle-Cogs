@@ -1066,7 +1066,7 @@ class RumbloDecoder(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     @app_commands.command()
-    async def decode_rumblo(self, interaction: discord.Interaction):
+    async def decode_rumblo(self, interaction: discord.Interaction, color: app_commands.Choice[str]):
     #@commands.command(name="decode")
     #async def decode_rumblo(self, ctx: commands.Context, code: str):
         """
