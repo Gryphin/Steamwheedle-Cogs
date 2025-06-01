@@ -1,4 +1,5 @@
 import discord
+import discord.ui # Import discord.ui
 from redbot.core import commands, app_commands
 import base64
 import os
@@ -625,7 +626,6 @@ lookup = {
     ],
   },
   0x15: {
-
     "name": "Bog Beast",
     "talents": [
       "Flourish",
@@ -862,252 +862,68 @@ UNIT_IMAGE_PATHS = {
 
 def get_unit(bytes_data: bytearray, unit_type_idx: int, talent_idx: int) -> RumbloUnit:
     """
-    Retrieves unit name and talent from lookup based on byte data.
+    [span_0](start_span)Retrieves unit name and talent from lookup based on byte data.[span_0](end_span)
     """
-    unit_info = lookup.get(bytes_data[unit_type_idx]) #cite: 1
+    unit_info = lookup.get(bytes_data[unit_type_idx]) #cite: 1, 46
     if not unit_info:
         log.warning(f"Unknown unit type byte: {bytes_data[unit_type_idx]:#0x}")
         return RumbloUnit(name="Unknown Unit", talent="N/A")
 
-    unit_name = unit_info["name"] #cite: 1
+    unit_name = unit_info["name"] #cite: 1, 46
     unit_talent = None
-    if len(bytes_data) > 4: #cite: 38
+    if len(bytes_data) > 4: #cite: 38, 46
         try:
-            unit_talent = unit_info["talents"][bytes_data[talent_idx]] #cite: 38
+            unit_talent = unit_info["talents"][bytes_data[talent_idx]] #cite: 38, 46
         except IndexError:
-            log.warning(f"Invalid talent index {bytes_data[talent_idx]} for unit {unit_name}")
+            log.warning(f"Invalid talent index {bytes_data[talent_idx]} for unit {unit_name}") #cite: 47
             unit_talent = "Invalid Talent Index"
         except KeyError:
-            log.warning(f"Talents not found for unit {unit_name}")
+            log.warning(f"Talents not found for unit {unit_name}") #cite: 47
             unit_talent = "No Talent Info"
 
-    return RumbloUnit(name=unit_name, talent=unit_talent) #cite: 38
+    return RumbloUnit(name=unit_name, talent=unit_talent) #cite: 38, 47
 
 def parse_loadout(input_string: str) -> Optional[List[RumbloUnit]]:
     """
-    Decodes a Rumblo loadout string into a list of RumbloUnit objects.
-    Raises ValueError for invalid input.
+    [span_1](start_span)Decodes a Rumblo loadout string into a list of RumbloUnit objects.[span_1](end_span)
+    [span_2](start_span)Raises ValueError for invalid input.[span_2](end_span)
     """
     if not input_string.startswith(RUMBLO_CODE_PREFIX):
         raise ValueError("Invalid Rumblo code format: missing prefix.")
 
     try:
-        payload = base64.b64decode(bytearray(input_string.replace(RUMBLO_CODE_PREFIX, ""), "utf-8")) #cite: 38
+        payload = base64.b64decode(bytearray(input_string.replace(RUMBLO_CODE_PREFIX, ""), "utf-8")) #cite: 38, 48
     except (base64.binascii.Error, UnicodeDecodeError) as e:
-        log.error(f"Base64 decoding error: {e}")
+        log.error(f"Base64 decoding error: {e}") #cite: 48
         raise ValueError("Failed to decode Rumblo code: invalid base64 format.") from e
     except Exception as e:
-        log.error(f"Unexpected error during payload decoding: {e}")
+        log.error(f"Unexpected error during payload decoding: {e}") #cite: 49
         raise ValueError("An unexpected error occurred during decoding.") from e
 
-    units: List[RumbloUnit] = [] #cite: 38
-    unit_bytes: List[int] = [] #cite: 38
+    units: List[RumbloUnit] = [] #cite: 38, 49
+    unit_bytes: List[int] = [] #cite: 38, 49
     
-    for i in range(len(payload)): #cite: 38
-        unit_bytes.append(payload[i]) #cite: 38
+    for i in range(len(payload)): #cite: 38, 49
+        unit_bytes.append(payload[i]) #cite: 38, 49
 
-        if payload[i] == UNIT_DELIMITER_BYTE or i == len(payload) - 1: #cite: 38
+        if payload[i] == UNIT_DELIMITER_BYTE or i == len(payload) - 1: #cite: 38, 49
             if not unit_bytes:
-                log.warning("Empty unit_bytes encountered before delimiter, skipping.")
+                log.warning("Empty unit_bytes encountered before delimiter, skipping.") #cite: 50
                 continue
 
-            parsing_leader = unit_bytes[0] == LEADER_UNIT_BYTE_IDENTIFIER #cite: 39
-            byte_start = 1 if parsing_leader else 2 #cite: 39
+            parsing_leader = unit_bytes[0] == LEADER_UNIT_BYTE_IDENTIFIER #cite: 39, 50
+            byte_start = 1 if parsing_leader else 2 #cite: 39, 50
             
             if byte_start + 2 >= len(unit_bytes):
-                log.warning(f"Malformed unit data segment: {unit_bytes}. Skipping unit.")
+                log.warning(f"Malformed unit data segment: {unit_bytes}. Skipping unit.") #cite: 51, 52
                 unit_bytes = []
                 continue
 
-            unit = get_unit(bytes_data=bytearray(unit_bytes), unit_type_idx=byte_start, talent_idx=byte_start + 2) #cite: 39
-            units.append(unit) #cite: 39
-            unit_bytes = [] #cite: 40
+            unit = get_unit(bytes_data=bytearray(unit_bytes), unit_type_idx=byte_start, talent_idx=byte_start + 2) #cite: 39, 52
+            units.append(unit) #cite: 39, 52
+            unit_bytes = [] #cite: 40, 52
             
     if not units:
-        raise ValueError("No units could be parsed from the provided code.")
+        raise ValueError("No units could be parsed from the provided code.") #cite: 53
         
-    return units #cite: 40
-
-def combine_unit_images(unit_names: List[str]) -> Optional[io.BytesIO]:
-    """
-    Combines images of units into a two-row layout:
-    First image 256x256, next up to 6 images 128x128 arranged in two rows of three.
-    Returns a BytesIO object containing the combined image, or None if no images are found.
-    """
-    if not unit_names:
-        return None
-
-    # Load and resize the main image (first unit)
-    main_image: Optional[Image.Image] = None
-    if unit_names:
-        first_unit_name = unit_names[0]
-        file_name = UNIT_IMAGE_PATHS.get(first_unit_name)
-        if file_name:
-            file_path = os.path.join(UNIT_IMAGE_DIRECTORY, file_name)
-            if os.path.exists(file_path):
-                try:
-                    img = Image.open(file_path).convert("RGBA")
-                    main_image = img.resize(LARGE_IMAGE_SIZE, Image.Resampling.LANCZOS)
-                except Exception as e:
-                    log.error(f"Could not open or process main image for {first_unit_name} at {file_path}: {e}")
-            else:
-                log.warning(f"Main image file not found for {first_unit_name} at {file_path}")
-        else:
-            log.info(f"No image path defined for main unit: {first_unit_name}")
-
-    # Load and resize the small images (up to next 6 units)
-    small_images: List[Image.Image] = []
-    for i in range(1, min(len(unit_names), 7)): # Iterate from the second unit up to a total of 7 (1 large + 6 small)
-        name = unit_names[i]
-        file_name = UNIT_IMAGE_PATHS.get(name)
-        if not file_name:
-            log.info(f"No image path defined for unit: {name}")
-            continue
-
-        file_path = os.path.join(UNIT_IMAGE_DIRECTORY, file_name)
-        if os.path.exists(file_path):
-            try:
-                img = Image.open(file_path).convert("RGBA")
-                img = img.resize(SMALL_IMAGE_SIZE, Image.Resampling.LANCZOS)
-                small_images.append(img)
-            except Exception as e:
-                log.error(f"Could not open or process small image for {name} at {file_path}: {e}")
-        else:
-            log.warning(f"Small image file not found for {name} at {file_path}")
-
-    if not main_image and not small_images:
-        return None
-
-    # Determine overall canvas dimensions
-    # The layout is:
-    # [Large Image (256x256)]
-    # [Small Image 1][Small Image 2][Small Image 3]
-    # [Small Image 4][Small Image 5][Small Image 6]
-
-    # Calculate width of the small image rows (max 3 images per row)
-    # The maximum width for a row of 3 small images is 3 * 128 = 384
-    small_rows_max_width = 3 * SMALL_IMAGE_SIZE[0]
-
-    # Combined image width will be the max of the large image width or the small rows width
-    combined_width = max(LARGE_IMAGE_SIZE[0] if main_image else 0, small_rows_max_width)
-
-    combined_height = 0
-    if main_image:
-        combined_height += LARGE_IMAGE_SIZE[1] # Height for the large image
-
-    # Add height for small image rows
-    if small_images:
-        # First row of small images
-        if len(small_images) > 0:
-            combined_height += SMALL_IMAGE_SIZE[1]
-        # Second row of small images (if more than 3)
-        if len(small_images) > 3:
-            combined_height += SMALL_IMAGE_SIZE[1]
-    
-    # If no main image but small images exist, ensure a valid height
-    if not main_image and small_images:
-        combined_height = 0 # Reset if main image was the only contributor
-        if len(small_images) > 0:
-            combined_height += SMALL_IMAGE_SIZE[1]
-        if len(small_images) > 3:
-            combined_height += SMALL_IMAGE_SIZE[1]
-        
-        # If only small images, ensure width is at least for a full row of 3 small images
-        combined_width = max(combined_width, small_rows_max_width)
-
-    if combined_width == 0 or combined_height == 0:
-        return None # Should not happen if main_image or small_images exist, but as a safeguard
-
-    combined_image = Image.new('RGBA', (combined_width, combined_height))
-
-    current_y_offset = 0
-
-    # Paste the main image (leader)
-    if main_image:
-        # Center the large image horizontally
-        x_offset_main = (combined_width - main_image.width) // 2
-        combined_image.paste(main_image, (x_offset_main, current_y_offset))
-        current_y_offset += main_image.height
-
-    # Paste small images in rows
-    small_images_to_paste = list(small_images) # Create a mutable copy
-    
-    for row_num in range(2): # Two rows for small images
-        if not small_images_to_paste:
-            break
-
-        current_row_images = small_images_to_paste[:3] # Get up to 3 images for the current row
-        small_images_to_paste = small_images_to_paste[3:] # Remove them from the list
-
-        current_row_width = sum(img.width for img in current_row_images)
-        x_offset = (combined_width - current_row_width) // 2 # Center the row
-
-        for img in current_row_images:
-            combined_image.paste(img, (x_offset, current_y_offset))
-            x_offset += img.width
-        
-        current_y_offset += SMALL_IMAGE_SIZE[1] # Move to the next row's starting y-coordinate
-
-    image_binary = io.BytesIO()
-    try:
-        combined_image.save(image_binary, 'PNG')
-        image_binary.seek(0)
-    except Exception as e:
-        log.error(f"Failed to save combined image to BytesIO: {e}")
-        return None
-
-    return image_binary
-
-
-class RumbloDecoder(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-
-    # Refactored to use a slash command
-    @app_commands.command(name="decode", description="Decodes a Rumblo loadout code and displays units/talents.")
-    @app_commands.describe(code="The Rumblo loadout code (e.g., 'rumblo:...')")
-    async def decode_rumblo(self, interaction: discord.Interaction, code: str):
-        """
-        Decodes a Rumblo loadout code and displays the units and their talents,
-        combining unit images using Pillow.
-        Usage: /decode <rumblo_code>
-        """
-        # Acknowledge the interaction immediately to prevent timeout
-        await interaction.response.defer()
-
-        try:
-            loadout_info = parse_loadout(code)
-        except ValueError as e:
-            await interaction.followup.send(f"Decoding error: {e}")
-            return
-
-        unit_details_text: List[str] = []
-        unit_names_for_images: List[str] = []
-        for i, unit in enumerate(loadout_info):
-            unit_details_text.append(f"**Unit {i+1}:** {unit.name} ({unit.talent or 'No Talent'})")
-            unit_names_for_images.append(unit.name)
-
-        combined_image_stream = combine_unit_images(unit_names_for_images)
-
-        if combined_image_stream:
-            embed = discord.Embed(
-                title="Rumblo Loadout Decoded",
-                description="\n".join(unit_details_text),
-                color=discord.Color.blue()
-            )
-            embed.set_image(url="attachment://loadout.png")
-            await interaction.followup.send(embed=embed, file=discord.File(fp=combined_image_stream, filename='loadout.png'))
-        else:
-            embed = discord.Embed(
-                title="Rumblo Loadout Decoded (No Images Available)",
-                description="\n".join(unit_details_text) + "\n\n*No unit images could be loaded or combined.*",
-                color=discord.Color.orange()
-            )
-            await interaction.followup.send(embed=embed)
-
-async def setup(bot):
-    await bot.add_cog(RumbloDecoder(bot))
-    # Sync slash commands with Discord. This is crucial for them to appear.
-    # For global commands, it's recommended to do this only once during bot startup or on changes.
-    # For testing, you might sync to a specific guild.
-    await bot.tree.sync()
+    return units #cite: 40, 
