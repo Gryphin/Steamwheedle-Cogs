@@ -864,7 +864,7 @@ UNIT_IMAGE_PATHS = {
     "Warsong Grunts": "warsong-grunts.png",
     "Spiderlings": "spiderlings.png",
     "Mountaineer": "mountaineer.png",
-    "Arthas Menethil": "arthas-menethil.png"
+    "Arthas Menethil": "arthas-menethil.png",
     "Thrall": "thrall.png"
     # Add all other units with their corresponding filenames
 }
