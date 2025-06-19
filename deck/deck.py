@@ -865,6 +865,7 @@ UNIT_IMAGE_PATHS = {
     "Spiderlings": "spiderlings.png",
     "Mountaineer": "mountaineer.png",
     "Arthas Menethil": "arthas-menethil.png"
+    "Thrall": "thrall.png"
     # Add all other units with their corresponding filenames
 }
 
