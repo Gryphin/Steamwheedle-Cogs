@@ -761,6 +761,14 @@ lookup = {
         "Purgatory"
     ],
   },
+    0x5f: {
+      "name": "Thrall",
+      "talents": [
+        "Totemic Mastery",
+        "Feral Spirit",
+        "Call Of The Horde"
+    ],
+  },
 }
 # --- End of content from dl.txt ---
 # --- Updated: Local Image Paths (Ensure these match your actual filenames) ---
